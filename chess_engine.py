@@ -577,6 +577,7 @@ class Move:
         self.end_col = end_sq[1]
         self.piece_moved = board[self.start_row][self.start_col]
         self.piece_captured = board[self.end_row][self.end_col]
+        self.board = [row[:] for row in board]  # Lưu một bản sao của bàn cờ
         # Xác định xem nước đi có phong cấp cho tốt không
         self.is_pawn_promotion = (self.piece_moved == 'wP' and self.end_row == 0) or (self.piece_moved == 'bP' and self.end_row == 7)
         # Xác định xem nước đi có phải là bắt tốt qua đường không
@@ -605,9 +606,49 @@ class Move:
 
     def get_chess_notation(self):
         """
-        Chuyển đổi nước đi sang ký hiệu đại số
+        Chuyển đổi nước đi sang ký hiệu đại số chuẩn quốc tế
+        Ví dụ: e4, Nf3, Bxe5, O-O, O-O-O, e8=Q
         """
-        return self.get_rank_file(self.start_row, self.start_col) + self.get_rank_file(self.end_row, self.end_col)
+        # Xử lý nhập thành
+        if self.is_castle_move:
+            if self.end_col - self.start_col == 2:  # Nhập thành cánh vua
+                return "O-O"
+            else:  # Nhập thành cánh hậu
+                return "O-O-O"
+
+        piece_moved = self.piece_moved[1]
+        move_string = ""
+        
+        # Với các quân không phải tốt, thêm ký hiệu quân
+        if piece_moved != 'P':
+            move_string = piece_moved
+            
+            # Kiểm tra xem có quân cùng loại có thể đi đến ô đích không
+            same_piece_moves = []
+            for row in range(8):
+                for col in range(8):
+                    if (row, col) != (self.start_row, self.start_col):  # Không phải quân đang di chuyển
+                        if self.board[row][col] == self.piece_moved:  # Cùng loại quân
+                            same_piece_moves.append((row, col))
+            
+            # Nếu có quân cùng loại có thể đi đến ô đích, thêm tọa độ để phân biệt
+            if same_piece_moves:
+                move_string += self.cols_to_files[self.start_col]
+
+        # Thêm x nếu bắt quân
+        if self.piece_captured != '--' or self.is_enpassant_move:
+            if piece_moved == 'P':
+                move_string += self.cols_to_files[self.start_col]
+            move_string += 'x'
+            
+        # Thêm ô đích
+        move_string += self.get_rank_file(self.end_row, self.end_col)
+        
+        # Xử lý phong cấp tốt
+        if self.is_pawn_promotion:
+            move_string += "=Q"  # Mặc định phong cấp thành hậu
+                
+        return move_string
 
     def get_rank_file(self, row, col):
         """

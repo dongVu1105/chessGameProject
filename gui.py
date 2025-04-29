@@ -4,8 +4,8 @@ import chess_ai
 import sys
 from multiprocessing import Process, Queue
 
-BOARD_WIDTH = BOARD_HEIGHT = 400
-MOVE_LOG_PANEL_WIDTH = 250
+BOARD_WIDTH = BOARD_HEIGHT = 512  # Tăng kích thước bàn cờ
+MOVE_LOG_PANEL_WIDTH = 300  # Tăng độ rộng phần ghi nước đi
 MOVE_LOG_PANEL_HEIGHT = BOARD_HEIGHT
 DIMENSION = 8
 SQ_SIZE = BOARD_HEIGHT // DIMENSION
@@ -293,10 +293,15 @@ def animate_move(move, screen, board, clock):
 
 def draw_move_log(screen, game_state, font):
     """
-    Vẽ nhật ký các nước đi
+    Vẽ nhật ký các nước đi với tính năng scroll
     """
     move_log_rect = p.Rect(BOARD_WIDTH, 0, MOVE_LOG_PANEL_WIDTH, MOVE_LOG_PANEL_HEIGHT)
     p.draw.rect(screen, GRAY, move_log_rect)
+    
+    # Tạo surface cho phần move log
+    move_log_surface = p.Surface((MOVE_LOG_PANEL_WIDTH - 10, MOVE_LOG_PANEL_HEIGHT * 2))
+    move_log_surface.fill(GRAY)
+    
     move_log = game_state.move_log
     move_texts = []
     for i in range(0, len(move_log), 2):
@@ -309,23 +314,54 @@ def draw_move_log(screen, game_state, font):
     text_y = padding
     line_spacing = 18
     
+    # Vẽ tất cả nước đi lên surface
     for i in range(len(move_texts)):
         text = font.render(move_texts[i], True, BLACK)
         text_rect = text.get_rect()
-        text_rect.topleft = (BOARD_WIDTH + padding, text_y)
-        screen.blit(text, text_rect)
+        text_rect.topleft = (padding, text_y)
+        move_log_surface.blit(text, text_rect)
         text_y += line_spacing
+    
+    # Tính toán vị trí scroll
+    if len(move_texts) * line_spacing > MOVE_LOG_PANEL_HEIGHT:
+        scroll_y = max(-(len(move_texts) * line_spacing - MOVE_LOG_PANEL_HEIGHT), 
+                      -((len(move_texts) - 1) * line_spacing))
+    else:
+        scroll_y = 0
+    
+    # Hiển thị phần có thể nhìn thấy của move log
+    screen.blit(move_log_surface, (BOARD_WIDTH, 0), 
+                (0, -scroll_y, MOVE_LOG_PANEL_WIDTH - 10, MOVE_LOG_PANEL_HEIGHT))
 
 def draw_text(screen, text):
     """
-    Vẽ text ở giữa màn hình
+    Vẽ text ở giữa màn hình với font hỗ trợ tiếng Việt
     """
-    font = p.font.SysFont("Arial", 32, True, False)
-    text_object = font.render(text, False, p.Color("Black"))
+    try:
+        font = p.font.SysFont("Tahoma", 32, True, False)  # Thử dùng Tahoma (thường có sẵn và hỗ trợ Unicode)
+    except:
+        font = p.font.SysFont("Arial", 32, True, False)  # Fallback về Arial nếu không có Tahoma
+    
+    # Vẽ text với viền đen để dễ đọc hơn
+    text_shadow = font.render(text, True, p.Color("Black"))
+    text_main = font.render(text, True, p.Color("White"))
+    
+    # Tính toán vị trí để text nằm giữa màn hình
     text_location = p.Rect(0, 0, BOARD_WIDTH, BOARD_HEIGHT).move(
-        BOARD_WIDTH / 2 - text_object.get_width() / 2, BOARD_HEIGHT / 2 - text_object.get_height() / 2
+        BOARD_WIDTH / 2 - text_shadow.get_width() / 2, 
+        BOARD_HEIGHT / 2 - text_shadow.get_height() / 2
     )
-    screen.blit(text_object, text_location)
+    
+    # Vẽ viền bằng cách vẽ text đen ở 4 góc
+    offset = 2
+    for dx, dy in [(-offset,-offset), (-offset,offset), (offset,-offset), (offset,offset)]:
+        shadow_location = text_location.copy()
+        shadow_location.x += dx
+        shadow_location.y += dy
+        screen.blit(text_shadow, shadow_location)
+    
+    # Vẽ text chính màu trắng ở giữa
+    screen.blit(text_main, text_location)
 
 if __name__ == "__main__":
     main()
