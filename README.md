@@ -78,7 +78,7 @@ Giao diện đồ họa trong `gui.py` cung cấp:
 4. Sử dụng phím 'R' để khởi động lại trò chơi
 
 
-## CONTRIBUTION:
+## Contribution:
 
 - Nhóm gồm 2 thành viên là Vũ Huy Đông - 23021529 và Trịnh Trung Đức - 23021537
 - Bạn Đông tạo logic cờ vua và xử lí đồ họa (chess_engine và gui)
