@@ -1,7 +1,7 @@
 # chessGameProject
 
-Link video demo: https://youtu.be/L870Yks0yno
-Trong video chúng em cho model đánh với 1 con bot có elo 1700 trên chess.com và thắng.
+- Link video demo: https://youtu.be/L870Yks0yno
+- Trong video chúng em cho model đánh với 1 con bot có elo 1700 trên chess.com và thắng.
 
 ## Tính Năng
 
