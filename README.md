@@ -9,12 +9,15 @@ Triển khai đầy đủ luật cờ vua bao gồm các nước đi đặc bi�
 - Nhập thành (cả bên vua và bên hậu)
 - Bắt tốt qua đường (En passant)
 - Phong cấp tốt
+
 Các chế độ chơi:
   - Người chơi với AI (nhấn phím 1)
   - AI với Người chơi (nhấn phím 2)
   - AI với AI (nhấn phím 3)
   - Người với Người (nhấn phím 4)
+
 Bảng hiển thị lịch sử nước đi với ký hiệu đại số tiêu chuẩn
+
 Khởi động lại ván đấu (nhấn phím R)
 
 ## Cấu Trúc Dự Án
